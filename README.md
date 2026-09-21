@@ -1,10 +1,10 @@
-- AutoYaST examples tests
+# AutoYaST examples tests
 
 This directory contains some tooling and a set of AutoYaST profiles to validate Agama support for
 AutoYaST. The idea is to run `agama-autoyast` to convert those profiles and check whether the result
 is correct.
 
-The tests are defined in the [index.test.json file](./index.test.js) which makes use of
+The tests are defined in the [index.test.js file](./index.test.js) which makes use of
 [Node test runner](https://nodejs.org/api/test.html). In a nutshell:
 
 1. Runs `agama-autoyast` to convert a profile.
