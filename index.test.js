@@ -49,6 +49,8 @@ test("minimal useful profile", () => {
 test("run a pre-scripts that modifies the profile in-place", () => {
   const { profile } = convert("pre-scripts.xml");
   assert.equal(profile.product.id, "Tumbleweed");
+  assert.equal(profile.scripts.pre, undefined);
+  assert.equal(profile.scripts.post.length, 1);
 });
 
 test("dynamic profile using rules", () => {

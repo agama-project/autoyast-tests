@@ -12,13 +12,19 @@
 
   <scripts>
     <pre-scripts config:type="list">
-    <script>
-      <filename>set-product.sh</filename>
-       <source><![CDATA[#!/bin/bash
-       touch /tmp/helo
-       sed -e "s/PRODUCT/Tumbleweed/" /tmp/profile/autoinst.xml > /tmp/profile/modified.xml
+      <script>
+        <filename>set-product.sh</filename>
+        <source><![CDATA[#!/bin/bash
+        sed -e "s/PRODUCT/Tumbleweed/" /tmp/profile/autoinst.xml > /tmp/profile/modified.xml
 ]]></source>
-    </script>
+      </script>
     </pre-scripts>
+    <chroot-scripts config:type="list">
+      <script>
+        <filename>enable-ssh.sh</filename>
+        <chrooted config:type="boolean">true</chrooted>
+	<source><![CDATA[#!/bin/bash\nsystemctl enable sshd]]></source>
+      </script>
+    </chroot-scripts>
   </scripts>
 </profile>
