@@ -1,0 +1,32 @@
+{
+  "name": "agama-autoyast-tests",
+  "version": "1.0.0",
+  "description": "Test the conversion of AutoYaST profiles in Agama",
+  "keywords": [
+    "agama",
+    "autoyast",
+    "test"
+  ],
+  "homepage": "https://github.com/agama-project/agama-autoyast-test#readme",
+  "bugs": {
+    "url": "https://github.com/agama-project/agama-autoyast-test/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agama-project/agama-autoyast-test.git"
+  },
+  "license": "LGPL-2.1",
+  "author": "",
+  "type": "module",
+  "main": "index.test.js",
+  "scripts": {
+    "eslint": "eslint",
+    "eslint:fix": "eslint --fix",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6"
+  }
+}
