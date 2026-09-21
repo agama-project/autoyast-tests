@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE autoinstall SYSTEM "/usr/share/autoinstall/dtd/rules.dtd">
+<autoinstall xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <rules config:type="list">
+    <rule>
+      <!-- simple condition to make the rule match -->
+      <memsize>
+        <match>100</match>
+        <match_type>greater</match_type>
+      </memsize>
+      <result>
+        <profile>tw.xml</profile>
+        <continue config:type="boolean">false</continue>
+      </result>
+    </rule>
+    <rule>
+      <linux>
+        <match>0</match>
+        <match_type>exact</match_type>
+      </linux>
+      <result>
+        <profile>sles.xml</profile>
+        <continue config:type="boolean">false</continue>
+      </result>
+    </rule>
+
+  </rules>
+</autoinstall>

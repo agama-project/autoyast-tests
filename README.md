@@ -35,6 +35,15 @@ For debugging, you can find the result of each test in the `results/` directory.
 
 > [!NOTE] You can override the name of the container by setting the `CINAME` environment variable.
 
+## Tested scenarios
+
+- A minimal profile ([minimal.xml](./fixtures/minimal.xml)).
+- A dynamic profile which uses a pre-script to set the product name
+  ([pre-scripts.xml](./fixtures/pre-scripts.xml)).
+- A dynamic profile using rules ([rules/](./fixtures/rules)).
+- A dynamic profile which sets the name of the product using ERB
+  ([dynamic.erb](./fixtures/dynamic.erb)).
+
 ## Notes
 
 - We are using a container because we need the `agama-autoyast` to run with privileges. In the

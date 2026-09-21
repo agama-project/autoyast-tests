@@ -40,3 +40,23 @@ const convert = (relUrl, testName) => {
 // Returns a JSON object with the result for the given test.
 const expectedResult = (name) =>
   JSON.parse(readFileSync(`fixtures/${name}.json`));
+
+test("minimal useful profile", () => {
+  const { profile } = convert("minimal.xml");
+  assert.deepEqual(profile, expectedResult("minimal"));
+});
+
+test("run a pre-scripts that modifies the profile in-place", () => {
+  const { profile } = convert("pre-scripts.xml");
+  assert.equal(profile.product.id, "Tumbleweed");
+});
+
+test("dynamic profile using rules", () => {
+  const { profile } = convert("", "rules");
+  assert.deepEqual(profile, expectedResult("tw"));
+});
+
+test("dynamic profile using ERB", () => {
+  const { profile } = convert("dynamic.erb");
+  assert.equal(profile.product.id, "Tumbleweed");
+});

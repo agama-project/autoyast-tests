@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!DOCTYPE profile>
+<profile
+    xmlns="http://www.suse.com/1.0/yast2ns"
+    xmlns:config="http://www.suse.com/1.0/configns"
+>
+  <users config:type="list">
+    <user>
+      <encrypted config:type="boolean">false</encrypted>
+      <user_password>rules</user_password>
+      <username>root</username>
+      <login>root</login>
+    </user>
+  </users>
+
+  <software>
+    <products config:type="list">
+      <product>Tumbleweed</product>
+    </products>
+  </software>
+</profile>

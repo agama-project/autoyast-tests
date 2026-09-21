@@ -1,0 +1,11 @@
+{
+  "product": {
+    "id": "Tumbleweed"
+  },
+  "software": {
+    "patterns": [
+      "base"
+    ],
+    "packages": []
+  }
+}
