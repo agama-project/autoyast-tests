@@ -43,6 +43,8 @@ const expectedResult = (name) =>
 
 test("minimal useful profile", () => {
   const { profile } = convert("minimal.xml");
+  // The "software" section includes the "base" pattern due to
+  // https://github.com/yast/yast-autoinstallation/blob/master/src/modules/Profile.rb#L152
   assert.deepEqual(profile, expectedResult("minimal"));
 });
 
