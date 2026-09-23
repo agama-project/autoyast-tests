@@ -1,0 +1,12 @@
+{
+  "product": {
+    "id": "Tumbleweed"
+  },
+  "localization": {
+    "language": "es.UTF-8"
+  },
+  "software": {
+    "packages": [],
+    "patterns": ["base"]
+  }
+}

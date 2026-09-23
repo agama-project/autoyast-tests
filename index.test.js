@@ -31,7 +31,7 @@ const convert = (relUrl, testName) => {
 
   const unsupportedFile = `results/${name}/unsupported.json`;
   if (existsSync(unsupportedFile)) {
-    result.unsupported = JSON.parse(unsupportedFile);
+    result.unsupported = JSON.parse(readFileSync(unsupportedFile));
   }
 
   return result;
@@ -68,4 +68,12 @@ test("dynamic profile using ERB", () => {
 test("classes", () => {
   const { profile } = convert("classes.xml");
     assert.deepEqual(profile.software.packages, ["pkg1"])
+});
+
+test("unsupported elements", () => {
+    const { profile, unsupported } = convert("unsupported.xml");
+    assert.deepEqual(profile, expectedResult("unsupported"));
+    const keys = unsupported.map((e) => e.key);
+    assert(keys.includes("general"));
+    assert(keys.includes("language/languages"))
 });

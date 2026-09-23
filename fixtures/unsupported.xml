@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<!DOCTYPE profile>
+<profile
+    xmlns="http://www.suse.com/1.0/yast2ns"
+    xmlns:config="http://www.suse.com/1.0/configns"
+>
+  <general>
+    <mode>
+      <confirm config:type="boolean">true</confirm>
+    </mode>
+  </general>
+
+  <language>
+    <language>es</language>
+    <languages>cz,de</languages>
+  </language>
+
+  <software>
+    <products config:type="list">
+      <product>Tumbleweed</product>
+    </products>
+  </software>
+</profile>
