@@ -35,12 +35,29 @@ For debugging, you can find the result of each test in the `results/` directory.
 
 > [!NOTE] You can override the name of the container by setting the `CINAME` environment variable.
 
+If you want to only run an specific test, you can use the `--test-name-pattern` switch:
+
+```text
+$ npm run test -- --test-name-pattern classes.xml
+```
+
+## Defining tests
+
+The test suite automatically searches for profiles under `fixtures/` which has the corresponding
+JSON file (e.g., `minimal.xml` and `minimal.json`). In that case, converts the AutoYaST profile and
+compares the result. If there is an `.unsupported.json` file, it tests it too.
+
+If a profile does not have a corresponding JSON file, it is not automatically processed. That's
+useful when we want to write the test ourselves instead of comparing the JSON output. Check the
+`rules` example.
+
 ## Tested scenarios
 
 - A minimal profile ([minimal.xml](./fixtures/minimal.xml)).
 - A dynamic profile which uses a pre-script to set the product name
   ([pre-scripts.xml](./fixtures/pre-scripts.xml)).
 - A dynamic profile using rules ([rules/](./fixtures/rules)).
+- A profile which uses classes ([classes.xml](./fixtures/classes.xml)).
 - A dynamic profile which sets the name of the product using ERB
   ([dynamic.erb](./fixtures/dynamic.erb)).
 

@@ -7,5 +7,14 @@
       "base"
     ],
     "packages": []
+  },
+  "scripts": {
+    "post": [
+      {
+        "chroot": true,
+        "content": "#!/bin/bash\\nsystemctl enable sshd",
+        "name": "enable-ssh.sh"
+       }
+     ]
   }
 }

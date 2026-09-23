@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import path from "node:path";
 import { execSync } from "node:child_process";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import process from "node:process";
 
 const CINAME = process.env.CINAME || "agama-autoyast";
-const AGAMA_AUTOYAST_PATH =
-  process.env.AGAMA_AUTOYAST_PATH || "/usr/bin/agama-autoyast";
+const AGAMA_AUTOYAST_PATH = process.env.AGAMA_AUTOYAST_PATH || "/usr/bin/agama-autoyast";
 
 // Convert an AutoYaST profile into an Agama configuration.
 //
@@ -37,43 +37,52 @@ const convert = (relUrl, testName) => {
   return result;
 };
 
-// Returns a JSON object with the result for the given test.
-const expectedResult = (name) =>
-  JSON.parse(readFileSync(`fixtures/${name}.json`));
+// Returns a JSON object with the result and the unsupported fields for the given profile.
+const expectedResult = (name) => {
+  const result = {};
+  const filename = path.join("fixtures", name);
+  const file = path.parse(path.join("fixtures", name));
 
-test("minimal useful profile", () => {
-  const { profile } = convert("minimal.xml");
-  // The "software" section includes the "base" pattern due to
-  // https://github.com/yast/yast-autoinstallation/blob/master/src/modules/Profile.rb#L152
-  assert.deepEqual(profile, expectedResult("minimal"));
-});
+  const resultsFilename = path.format({
+    ...file,
+    base: `${file.name}.json`,
+  });
 
-test("run a pre-scripts that modifies the profile in-place", () => {
-  const { profile } = convert("pre-scripts.xml");
-  assert.equal(profile.product.id, "Tumbleweed");
-  assert.equal(profile.scripts.pre, undefined);
-  assert.equal(profile.scripts.post.length, 1);
-});
+  if (existsSync(resultsFilename)) {
+    result.profile = JSON.parse(readFileSync(resultsFilename));
+  }
+
+  const unsupportedFilename = path.format({
+    ...file,
+    base: `${file.name}.unsupported.json`,
+  });
+  if (existsSync(unsupportedFilename)) {
+    result.unsupported = JSON.parse(readFileSync(unsupportedFilename));
+  }
+
+  return result;
+};
 
 test("dynamic profile using rules", () => {
   const { profile } = convert("", "rules");
-  assert.deepEqual(profile, expectedResult("tw"));
+  const { profile: expectedProfile } = expectedResult("tw.xml");
+  assert.deepEqual(profile, expectedProfile);
 });
 
-test("dynamic profile using ERB", () => {
-  const { profile } = convert("dynamic.erb");
-  assert.equal(profile.product.id, "Tumbleweed");
-});
+const PROFILES_EXTENSIONS = [".xml", ".erb"];
+const profiles = readdirSync("fixtures").filter((f) =>
+  PROFILES_EXTENSIONS.includes(path.extname(f)),
+);
 
-test("classes", () => {
-  const { profile } = convert("classes.xml");
-    assert.deepEqual(profile.software.packages, ["pkg1"])
-});
+profiles.forEach((file) => {
+  const { profile: expectedProfile, unsupported: expectedUnsupported } = expectedResult(file);
+  if (expectedProfile === undefined) return;
 
-test("unsupported elements", () => {
-    const { profile, unsupported } = convert("unsupported.xml");
-    assert.deepEqual(profile, expectedResult("unsupported"));
-    const keys = unsupported.map((e) => e.key);
-    assert(keys.includes("general"));
-    assert(keys.includes("language/languages"))
+  test(`${file}`, () => {
+    const { profile, unsupported } = convert(file);
+    assert.deepEqual(expectedProfile, profile);
+    if (expectedUnsupported !== undefined) {
+      assert.deepEqual(unsupported, expectedUnsupported);
+    }
+  });
 });

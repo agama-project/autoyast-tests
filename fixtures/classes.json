@@ -1,0 +1,10 @@
+{
+  "software": {
+    "packages": [
+      "pkg1"
+    ],
+    "patterns": [
+      "base"
+    ]
+  }
+}
