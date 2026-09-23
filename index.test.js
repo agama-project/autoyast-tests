@@ -64,3 +64,8 @@ test("dynamic profile using ERB", () => {
   const { profile } = convert("dynamic.erb");
   assert.equal(profile.product.id, "Tumbleweed");
 });
+
+test("classes", () => {
+  const { profile } = convert("classes.xml");
+    assert.deepEqual(profile.software.packages, ["pkg1"])
+});

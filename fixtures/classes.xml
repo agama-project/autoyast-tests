@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<!DOCTYPE profile>
+<profile
+    xmlns="http://www.suse.com/1.0/yast2ns"
+    xmlns:config="http://www.suse.com/1.0/configns"
+>
+  <classes config:type="list">
+    <class>
+      <class_name>lab1</class_name>
+      <configuration>software.xml</configuration>
+    </class>
+  </classes>
+</profile>
