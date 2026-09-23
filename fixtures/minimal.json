@@ -4,5 +4,9 @@
   },
   "root": {
     "password": "linux"
+  },
+  "software": {
+    "packages": [],
+    "patterns": ["base"]
   }
 }
