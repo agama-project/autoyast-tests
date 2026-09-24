@@ -59,7 +59,7 @@ before(() => {
   }
 
   execSync(
-    `podman create --name ${CINAME} --privileged -v .:/test ${AGAMA_SOURCES_MOUNTS} --entrypoint tail ${CINAME} -f /dev/null`,
+    `podman create --name ${CINAME} --privileged -v .:/test ${AGAMA_SOURCES_MOUNTS} ${CINAME}`,
   );
   execSync(`podman start ${CINAME}`);
 
