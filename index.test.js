@@ -28,10 +28,7 @@ const AGAMA_AUTOYAST_PATH =
   process.env.AGAMA_AUTOYAST_PATH ||
   (AGAMA_SOURCES ? "/agama-src/service/bin/agama-autoyast" : "/usr/bin/agama-autoyast");
 
-// When running from AGAMA_SOURCES, `agama-autoyast` must be run through `bundle exec`. The script
-// itself also calls `require "bundler/setup"`, but running it without `bundle exec` first makes
-// Ruby activate whatever default gems it ships with (e.g. "forwardable") before Bundler gets a
-// chance to run, which then conflicts with the versions pinned in Gemfile.lock.
+// When running from AGAMA_SOURCES, `agama-autoyast` must be run through `bundle exec`.
 const AGAMA_AUTOYAST_CMD = AGAMA_SOURCES
   ? `bundle exec ${AGAMA_AUTOYAST_PATH}`
   : AGAMA_AUTOYAST_PATH;
