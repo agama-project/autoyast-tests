@@ -18,6 +18,13 @@ The tests run on a container that includes the dependencies required by `agama-a
 use the [Containerfile](./Containerfile) included in this repositry to build such a container:
 
 ```text
+$ podman run build
+```
+
+Alternatively, if you want to override any parameter when building the container (e.g., the name),
+you can use the `podman build` comand:
+
+```text
 $ podman build . -t agama-autoyast
 ```
 
