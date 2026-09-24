@@ -1,4 +1,4 @@
-import test, { before } from "node:test";
+import test, { before, after } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { execSync } from "node:child_process";
@@ -37,7 +37,7 @@ const AGAMA_AUTOYAST_CMD = AGAMA_SOURCES
   : AGAMA_AUTOYAST_PATH;
 
 // Directory used to cache the gems installed by Bundler across test runs.
-const BUNDLE_CACHE_DIR = path.resolve(".agama-bundle");
+const BUNDLE_CACHE_DIR = path.resolve("bundle");
 
 // Extra volume mounts and environment needed to run `agama-autoyast` from AGAMA_SOURCES.
 const AGAMA_SOURCES_MOUNTS = AGAMA_SOURCES
@@ -48,22 +48,38 @@ const AGAMA_SOURCES_ENV = AGAMA_SOURCES
     "BUNDLE_APP_CONFIG=/agama-bundle/.bundle; "
   : "";
 
-// Install the AGAMA_SOURCES Ruby dependencies once, before running any test.
-if (AGAMA_SOURCES) {
-  before(() => {
-    console.info(`Installing dependencies from ${AGAMA_SOURCES} (bundle install)`);
+before(() => {
+  // Remove any stale container left over from a previous, interrupted run. `-t 0` skips the
+  // graceful-stop grace period.
+  try {
+    execSync(`podman rm -f -t 0 ${CINAME}`, { stdio: "ignore" });
+  } catch {
+    // There was no leftover container. Nothing to do.
+  }
+
+  if (AGAMA_SOURCES) {
     mkdirSync(BUNDLE_CACHE_DIR, { recursive: true });
+  }
+
+  execSync(
+    `podman create --name ${CINAME} --privileged -v .:/test ${AGAMA_SOURCES_MOUNTS} --entrypoint tail ${CINAME} -f /dev/null`,
+  );
+  execSync(`podman start ${CINAME}`);
+
+  if (AGAMA_SOURCES) {
+    console.info(`Installing dependencies from ${AGAMA_SOURCES} (bundle install)`);
 
     const cmd =
       "git config --global --add safe.directory /agama-src; " +
       `${AGAMA_SOURCES_ENV}bundle install`;
 
-    execSync(
-      `podman run --rm --name ${CINAME}-bundle-install ${AGAMA_SOURCES_MOUNTS} --entrypoint /bin/bash ${CINAME} -c "${cmd}"`,
-      { stdio: "inherit" },
-    );
-  });
-}
+    execSync(`podman exec ${CINAME} bash -c "${cmd}"`, { stdio: "inherit" });
+  }
+});
+
+after(() => {
+  execSync(`podman rm -f -t 0 ${CINAME}`);
+});
 
 // Convert an AutoYaST profile into an Agama configuration.
 //
@@ -77,9 +93,7 @@ const convert = (relUrl, testName) => {
   console.info(`Converting ${relUrl || name}`);
 
   // Run agama-autoyast in the container.
-  execSync(
-    `podman run --rm --name ${CINAME} --privileged -v .:/test ${AGAMA_SOURCES_MOUNTS} --entrypoint /bin/bash ${CINAME} -c "${cmd}"`,
-  );
+  execSync(`podman exec ${CINAME} bash -c "${cmd}"`);
 
   // Read and return the result.
   const result = {

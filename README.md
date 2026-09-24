@@ -52,8 +52,8 @@ $ AGAMA_SOURCES=/path/to/agama npm run test
 When `AGAMA_SOURCES` is set:
 
 - The whole checkout is bind-mounted into the container.
-- Before running any test, `bundle install` is executed to install the dependencies to the
-  `.agama-bundle` directory, so it acts as a cache for subsequent runs.
+- Before running any test, `bundle install` is executed to install the dependencies to the `bundle`
+  directory, so it acts as a cache for subsequent runs.
 - Each test uses `bundle exec` to run `agama-autoyast`.
 - As a side effect, running the tests **will modify Gemfile.lock**.
 
@@ -87,8 +87,9 @@ useful when we want to write the test ourselves instead of comparing the JSON ou
 
 ## Notes
 
-- We are using a container because we need the `agama-autoyast` to run with privileges. In the
-  future, we might support pointing to an `agama-autoyast` executable instead.
-- Instead of using `podman run` (or `docker`), we could use `podman start` and `podman exec` so
-  Agama's D-Bus service might be available. However, as it is not required, we went for the simpler
-  solution.
+- We are using a container because we need the `agama-autoyast` to run with privileges.
+- A single container is created and started once (before running any test) and each test runs its
+  conversion in it via `podman exec`.
+- The container is kept alive with a simple `tail -f /dev/null` placeholder process; it does not
+  boot the image's init system, so services like D-Bus are not available inside it. This is not a
+  problem for these tests.
