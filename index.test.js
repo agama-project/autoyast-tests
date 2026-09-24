@@ -1,12 +1,69 @@
-import test from "node:test";
+import test, { before } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import { execSync } from "node:child_process";
-import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, mkdirSync } from "node:fs";
 import process from "node:process";
 
+// Name of the container image.
 const CINAME = process.env.CINAME || "agama-autoyast";
-const AGAMA_AUTOYAST_PATH = process.env.AGAMA_AUTOYAST_PATH || "/usr/bin/agama-autoyast";
+
+// When set, it must point to the root of a full Agama repository checkout (the one containing
+// the `service/` directory and `.git`).
+const AGAMA_SOURCES = process.env.AGAMA_SOURCES
+  ? path.resolve(process.env.AGAMA_SOURCES)
+  : undefined;
+
+if (AGAMA_SOURCES) {
+  const agamaAutoyastBin = path.join(AGAMA_SOURCES, "service", "bin", "agama-autoyast");
+  if (!existsSync(agamaAutoyastBin)) {
+    throw new Error(
+      `AGAMA_SOURCES is set to "${AGAMA_SOURCES}", but "${agamaAutoyastBin}" was not found. ` +
+        "It must point to the root of a full Agama repository checkout.",
+    );
+  }
+}
+
+const AGAMA_AUTOYAST_PATH =
+  process.env.AGAMA_AUTOYAST_PATH ||
+  (AGAMA_SOURCES ? "/agama-src/service/bin/agama-autoyast" : "/usr/bin/agama-autoyast");
+
+// When running from AGAMA_SOURCES, `agama-autoyast` must be run through `bundle exec`. The script
+// itself also calls `require "bundler/setup"`, but running it without `bundle exec` first makes
+// Ruby activate whatever default gems it ships with (e.g. "forwardable") before Bundler gets a
+// chance to run, which then conflicts with the versions pinned in Gemfile.lock.
+const AGAMA_AUTOYAST_CMD = AGAMA_SOURCES
+  ? `bundle exec ${AGAMA_AUTOYAST_PATH}`
+  : AGAMA_AUTOYAST_PATH;
+
+// Directory used to cache the gems installed by Bundler across test runs.
+const BUNDLE_CACHE_DIR = path.resolve(".agama-bundle");
+
+// Extra volume mounts and environment needed to run `agama-autoyast` from AGAMA_SOURCES.
+const AGAMA_SOURCES_MOUNTS = AGAMA_SOURCES
+  ? `-v ${AGAMA_SOURCES}:/agama-src:z -v ${BUNDLE_CACHE_DIR}:/agama-bundle:z`
+  : "";
+const AGAMA_SOURCES_ENV = AGAMA_SOURCES
+  ? "export BUNDLE_GEMFILE=/agama-src/service/Gemfile BUNDLE_PATH=/agama-bundle " +
+    "BUNDLE_APP_CONFIG=/agama-bundle/.bundle; "
+  : "";
+
+// Install the AGAMA_SOURCES Ruby dependencies once, before running any test.
+if (AGAMA_SOURCES) {
+  before(() => {
+    console.info(`Installing dependencies from ${AGAMA_SOURCES} (bundle install)`);
+    mkdirSync(BUNDLE_CACHE_DIR, { recursive: true });
+
+    const cmd =
+      "git config --global --add safe.directory /agama-src; " +
+      `${AGAMA_SOURCES_ENV}bundle install`;
+
+    execSync(
+      `podman run --rm --name ${CINAME}-bundle-install ${AGAMA_SOURCES_MOUNTS} --entrypoint /bin/bash ${CINAME} -c "${cmd}"`,
+      { stdio: "inherit" },
+    );
+  });
+}
 
 // Convert an AutoYaST profile into an Agama configuration.
 //
@@ -16,12 +73,12 @@ const convert = (relUrl, testName) => {
   const name = testName || relUrl.replace(/\.[^/.]+$/, "");
   const resultsDir = `/test/results/${name}`;
 
-  const cmd = `${AGAMA_AUTOYAST_PATH} file:///test/fixtures/${relUrl} ${resultsDir}`;
+  const cmd = `${AGAMA_SOURCES_ENV}${AGAMA_AUTOYAST_CMD} file:///test/fixtures/${relUrl} ${resultsDir}`;
   console.info(`Converting ${relUrl || name}`);
 
   // Run agama-autoyast in the container.
   execSync(
-    `podman run --rm --name ${CINAME} --privileged -v .:/test --entrypoint /bin/bash ${CINAME} -c "${cmd}"`,
+    `podman run --rm --name ${CINAME} --privileged -v .:/test ${AGAMA_SOURCES_MOUNTS} --entrypoint /bin/bash ${CINAME} -c "${cmd}"`,
   );
 
   // Read and return the result.

@@ -10,14 +10,12 @@ The tests are defined in the [index.test.js file](./index.test.js) which makes u
 1. Runs `agama-autoyast` to convert a profile.
 2. The test can make any assertion on the resulting profile or the list of unsupported elements.
 
-You might want to have a look to the [index.test.js](./index.test.js) file to have a better idea.
+You might want to have a look to the [index.test.js](./index.test.js) file to have a better idea
 
 ## Set up
 
-The first thing you need to do before running the tests is to create a container which includes
-`agama-autoyast` (from the `rubygem-agama-yast` package). This repository includes a
-[Containerfile](./Containerfile) that you can use. Using `podman build` (or docker) should be
-enough:
+The tests run on a container that includes the dependencies required by `agama-autoyast`. You can
+use the [Containerfile](./Containerfile) included in this repositry to build such a container:
 
 ```text
 $ podman build . -t agama-autoyast
@@ -25,7 +23,16 @@ $ podman build . -t agama-autoyast
 
 ## Running the tests
 
-Once the container is built, you can run the tests typing:
+Once you have built the container, you have two options to run the tests:
+
+- Use the `rubygem-agama-yast` package included in the testing container.
+- Use a local checkout of Agama on top of the container.
+
+> [!NOTE] You can override the name of the container by setting the `CINAME` environment variable.
+
+### Using the package
+
+If you want to run the tests against the `rubygem-agama-yast` package, just type:
 
 ```text
 $ npm run test
@@ -33,7 +40,24 @@ $ npm run test
 
 For debugging, you can find the result of each test in the `results/` directory.
 
-> [!NOTE] You can override the name of the container by setting the `CINAME` environment variable.
+### Using local sources
+
+To run the tests against a local checkout of Agama, you need to set the `AGAMA_SOURCES` to the root
+of the repository (the directory containing the `service/` directory):
+
+```text
+$ AGAMA_SOURCES=/path/to/agama npm run test
+```
+
+When `AGAMA_SOURCES` is set:
+
+- The whole checkout is bind-mounted into the container.
+- Before running any test, `bundle install` is executed to install the dependencies to the
+  `.agama-bundle` directory, so it acts as a cache for subsequent runs.
+- Each test uses `bundle exec` to run `agama-autoyast`.
+- As a side effect, running the tests **will modify Gemfile.lock**.
+
+### Running specific tests
 
 If you want to only run an specific test, you can use the `--test-name-pattern` switch:
 
