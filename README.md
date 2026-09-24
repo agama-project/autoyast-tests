@@ -20,7 +20,7 @@ The first thing you need to do before running the tests is to create a container
 enough:
 
 ```text
-$ cargo build . -t agama-autoyast
+$ podman build . -t agama-autoyast
 ```
 
 ## Running the tests
