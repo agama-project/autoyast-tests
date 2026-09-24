@@ -22,7 +22,7 @@
   "scripts": {
     "eslint": "eslint",
     "eslint:fix": "eslint --fix",
-    "build": "podman build -t agama-autoyast .",
+    "build-ci": "podman build -t agama-autoyast .",
     "test": "node --test"
   },
   "devDependencies": {
